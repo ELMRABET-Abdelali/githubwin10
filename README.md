@@ -1,101 +1,110 @@
-# GitHubWin10 — Windows 10 et Portainer automatiques
+# GitHubWin10 — Windows 10 + Portainer, KVM obligatoire
 
-Guide étudiant : https://githubwin10-etudiants.vercel.app/
+Site pédagogique : https://githubwin10-etudiants.vercel.app/
 
-Après la création ou la reconstruction d'un GitHub Codespace, **postStartCommand** exécute `scripts/bootstrap.sh` automatiquement. Il génère **sur la machine** un mot de passe Windows et un mot de passe initial pour Portainer, puis lance les deux conteneurs sans intervention.
+## Ce qui change
 
-## Procédure
+Le fichier `compose.yaml` configure **Windows 10, 4 vCPU, 4 Go de RAM, disque virtuel QCOW2 de 32 Go, KVM=Y**, avec le périphérique `/dev/kvm`.
 
-1. Ouvrir le dépôt : https://github.com/ELMRABET-Abdelali/githubwin10
-2. **Code → Codespaces → Create codespace on main** (ou **Rebuild Container** si le Codespace existe).
-3. Dans le terminal, exécuter : `bash scripts/show-credentials.sh` pour lire les identifiants privés.
-4. Dans **Ports**, ouvrir **9000** pour Portainer et **8006** pour Windows. Garder **Private**.
-5. Si l'initialisation automatique ne s'est pas achevée : `bash scripts/bootstrap.sh`.
+**Important : KVM et QCOW2 ne sont pas des alternatives.** KVM est l'accélérateur de la machine virtuelle. QCOW2 est le format de son disque. Les deux sont utilisés simultanément.
 
-> Le mot de passe Portainer est utilisé lors de la **création initiale** du compte admin uniquement. Si le volume Portainer contient déjà un compte, le mot de passe précédent reste valide. Le rebuild ne supprime ni ne réinitialise les volumes. Les mots de passe ne doivent **jamais** être partagés ou ajoutés à GitHub.
+**Le nouveau démarrage refuse l'émulation lente** : si le moteur Docker n'a pas accès à KVM, seul **Portainer** est lancé. Il ne sert à rien de reconstruire le Codespace en boucle pour activer KVM : c'est une capacité de l'hôte GitHub, qui ne peut pas être créée par un Dockerfile ou un script.
 
-### Diagnostic
+## Recommandation avant de supprimer l'ancien Codespace
+
+Dans le Codespace existant, essayer d'abord :
 
 ```bash
-docker compose ps -a
-docker logs --tail=100 githubwin10-windows
-docker logs --tail=100 githubwin10-portainer
-curl -I http://127.0.0.1:8006
-df -h
-docker system df
+cd /workspaces/githubwin10
+git pull --ff-only origin main
+bash scripts/check-kvm.sh
 ```
 
-### Limites à connaître
+- Si le résultat est **OK : Docker peut accéder au périphérique KVM**, Windows peut être essayé avec accélération.
+- Si le résultat est **ERREUR : /dev/kvm n'est pas accessible**, ne supprimez pas l'ancienne machine en pensant qu'une nouvelle Codespace aura nécessairement KVM. Utilisez plutôt un hôte Linux KVM ou un serveur qui autorise la virtualisation imbriquée.
 
-- Windows utilise l'image `dockurr/windows:latest`, version 10, 4 vCPU, RAM 4 Go, disque virtuel QCOW2 de 32 Go.
-- Un Codespace de **32 Go au total** peut manquer de place pour l'ISO, Docker et l'installation Windows, même si QCOW2 alloue le disque progressivement.
-- Sans `/dev/kvm`, démarrage automatique en émulation QEMU **très lente** : l'interface 8006 peut apparaître alors que Windows ne peut pas démarrer correctement. Aucun code ne peut rendre KVM disponible si GitHub ne le fournit pas.
-- Les ports exposés par Docker doivent rester **Private dans Codespaces**, et jamais être publiés à des utilisateurs non autorisés.
-- Windows 10 est hors support standard, une licence Windows reste nécessaire.
+Ce test vérifie la disponibilité du périphérique Docker mais **ne garantit pas à lui seul** que Windows terminera son installation.
 
-### Initialisation ou dépannage manuel
+## Nouveau Codespace créé depuis ce dépôt
+
+1. Ouvrir https://github.com/ELMRABET-Abdelali/githubwin10
+2. **Code → Codespaces → Create codespace on main**
+3. Le démarrage automatique crée des mots de passe privés et démarre **Portainer sur 9000**. Windows sur **8006** ne démarre automatiquement **que si KVM est utilisable par Docker**.
+4. Dans le terminal :
 
 ```bash
-bash scripts/bootstrap.sh
+bash scripts/check-kvm.sh
 bash scripts/show-credentials.sh
-docker compose restart portainer
-docker compose restart windows
+docker compose ps -a
 ```
 
-Pour un compte Portainer déjà créé, utiliser l'outil officiel de réinitialisation de Portainer après avoir stoppé le conteneur et sauvegardé son volume, pas la commande d'initialisation.
+Les ports doivent rester en visibilité **Private** dans l'onglet Ports.
 
-## Depuis un Codespace existant
-
-Cloner :
+## Codespace existant avec Docker
 
 ```bash
 cd /workspaces
 git clone https://github.com/ELMRABET-Abdelali/githubwin10.git
 cd githubwin10
+bash scripts/bootstrap.sh
+bash scripts/show-credentials.sh
 ```
 
-Installer et demarrer automatiquement :
+Le moteur Docker et Docker Compose doivent être installés et accessibles dans ce Codespace. La commande bootstrap ne peut pas créer KVM.
+
+## Démarrage manuel sur un hôte avec KVM
 
 ```bash
+cd /workspaces/githubwin10
+bash scripts/check-kvm.sh
 bash scripts/bootstrap.sh
+docker compose ps
 ```
 
-Afficher les identifiants :
+Le script `scripts/bootstrap.sh` :
+- Génère les mots de passe (si absents) sans les publier sur GitHub.
+- Démarre Portainer sur 9000.
+- Teste KVM dans le moteur Docker.
+- Démarre Windows sur 8006 **seulement si le test KVM réussit**.
+- Ne supprime aucun disque ni volume Docker.
+
+Identifiant initial Portainer : `admin`. Le compte Windows est celui de la variable `WINDOWS_USERNAME` dans `.env`, par défaut `ratech`. Pour lire les mots de passe locaux :
 
 ```bash
 bash scripts/show-credentials.sh
 ```
 
-Si vous avez cree le Codespace directement depuis ce depot, le clonage est inutile et le bootstrap s'execute au demarrage. Les ports Windows et Portainer sont 8006 et 9000, a conserver en mode prive. La commande bootstrap suppose Docker Engine et Docker Compose deja accessibles ; sinon utilisez un Codespace construit depuis ce depot.
+**Ne partagez jamais la sortie de cette commande.** Si un compte Portainer existait déjà, l'ancien mot de passe est conservé.
 
-
-## Corriger l'erreur de redemarrage pendant l'installation Windows 10
-
-Si le bureau web (port 8006) affiche **« L'ordinateur a redemarre de maniere inattendue ... L'installation de Windows ne peut pas continuer »** :
-
-1. **Ne cliquez pas tout de suite sur OK.** Placez le focus dans l'ecran Windows et appuyez sur **Maj + F10** (certains claviers demandent **Fn + Maj + F10**). Une console de commandes **Windows** doit apparaitre.
-2. Dans cette **console Windows, pas dans le terminal Linux Codespaces**, copiez :
-
-   ```cmd
-   reg add "HKLM\SYSTEM\Setup\Status\ChildCompletion" /v setup.exe /t REG_DWORD /d 3 /f
-   ```
-
-3. Si Windows confirme que l'operation a reussi, fermez la console et cliquez **OK** dans la fenetre d'erreur. L'installation pourra poursuivre si les autres conditions sont satisfaites.
-
-Cette correction est un contournement d'une boucle de Windows Setup et **n'efface pas le disque**. Elle peut echouer si le disque est plein ou si les fichiers Windows sont corrompus. Ne recommencez pas indefiniment si le message revient.
-
-### Verifier le conteneur depuis Linux si la correction ne suffit pas
+## Diagnostic
 
 ```bash
-cd /workspaces/githubwin10
+bash scripts/check-kvm.sh
 docker compose ps -a
 docker logs --tail=100 githubwin10-windows
+docker logs --tail=100 githubwin10-portainer
 df -h
 docker system df
 ```
 
-**Important :** Ne lancez pas `docker compose down -v`, `docker volume prune` ou une reinstallation du disque Windows sans sauvegarde. Le rebuild Codespaces n'est pas une reinstallation de Windows et n'efface pas cette erreur presente sur le volume.
+Dans Codespaces, Windows 10 avec un disque virtuel de 32 Go sur un volume hôte de 32 Go est très contraint : Linux, Docker et l'image d'installation utilisent aussi de l'espace. Le projet dockur/windows recommande au moins **32 Go libres sur l'hôte**, qui ne sont pas disponibles dans un Codespace totalisant seulement 32 Go après installation de Linux et Docker.
 
-References :
-- https://learn.microsoft.com/en-us/answers/questions/2790019/windows-10-install-issue
+Si un Windows existant boucle sur une erreur d'installation, **rebuild Codespaces ne remet pas son disque à zéro**. Ne lancez pas `docker compose down -v` ni `docker volume prune` sans sauvegarde. Un nouveau Codespace possède ses propres volumes.
+
+### Erreur Windows « L'ordinateur a redémarré de manière inattendue »
+
+Dans l'interface Windows 8006, appuyer sur **Maj + F10** pendant le message d'erreur, puis exécuter cette commande **dans Windows CMD** (pas Linux) :
+
+```cmd
+reg add "HKLM\SYSTEM\Setup\Status\ChildCompletion" /v setup.exe /t REG_DWORD /d 3 /f
+```
+
+Fermer la console, cliquer OK, puis vérifier que l'installation continue. C'est un contournement limité, pas une garantie si KVM ou l'espace disque sont insuffisants.
+
+## Références
+
 - https://github.com/dockur/windows
+- https://docs.github.com/en/codespaces
+- https://docs.portainer.io/start/install-ce/server/docker/linux
+
+Windows 10 a dépassé sa fin de support standard ; une licence appropriée reste nécessaire.
