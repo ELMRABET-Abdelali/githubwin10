@@ -1,21 +1,19 @@
 name: githubwin10
-
 services:
   portainer:
     image: portainer/portainer-ce:lts
     container_name: githubwin10-portainer
     restart: unless-stopped
-    # HTTP n'est disponible que sur localhost; dans Codespaces, garder le port prive.
-    command: --http-enabled
+    command: ["--http-enabled", "--admin-password-file", "/run/portainer-admin-password"]
     ports:
-      - "127.0.0.1:9000:9000"
-      - "127.0.0.1:9443:9443"
+      - "9000:9000"
+      - "9443:9443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
+      - ./.secrets/portainer-password:/run/portainer-admin-password:ro
 
   windows:
-    profiles: ["windows"]
     image: dockurr/windows:latest
     container_name: githubwin10-windows
     restart: unless-stopped
@@ -29,18 +27,18 @@ services:
       KVM: "N"
       NETWORK: "user"
       USER_PORTS: "3389"
-      REMOVE: "Y"
       LANGUAGE: "${WINDOWS_LANGUAGE:-French}"
-      USERNAME: "${WINDOWS_USERNAME:-ratech}"
-      PASSWORD: "${WINDOWS_PASSWORD:?Definir WINDOWS_PASSWORD dans .env}"
+      USERNAME: "${WINDOWS_USERNAME:-etudiant}"
+      PASSWORD: "${WINDOWS_PASSWORD:?Mot de passe Windows absent dans .env}"
       AUTOLOGIN: "N"
       PROTECT: "Y"
+      WEB: "Y"
+      DISPLAY: "web"
     ports:
-      - "127.0.0.1:8006:8006"
-      - "127.0.0.1:3389:3389/tcp"
+      - "8006:8006"
+      - "3389:3389/tcp"
     volumes:
       - windows_storage:/storage
-
 volumes:
   portainer_data:
   windows_storage:
