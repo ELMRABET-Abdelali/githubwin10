@@ -24,7 +24,7 @@ services:
       RAM_SIZE: "${WINDOWS_RAM_SIZE:-4G}"
       DISK_SIZE: "${WINDOWS_DISK_SIZE:-32G}"
       DISK_FMT: "qcow2"
-      KVM: "N"
+      KVM: "Y"
       NETWORK: "user"
       USER_PORTS: "3389"
       LANGUAGE: "${WINDOWS_LANGUAGE:-French}"
@@ -34,6 +34,8 @@ services:
       PROTECT: "Y"
       WEB: "Y"
       DISPLAY: "web"
+    devices:
+      - /dev/kvm:/dev/kvm
     ports:
       - "8006:8006"
       - "3389:3389/tcp"
