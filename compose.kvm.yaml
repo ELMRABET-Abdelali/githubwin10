@@ -1,8 +1,0 @@
-# Ajouter ce fichier uniquement quand /dev/kvm est disponible.
-# Exemple : docker compose -f compose.yaml -f compose.kvm.yaml --profile windows up -d
-services:
-  windows:
-    environment:
-      KVM: "Y"
-    devices:
-      - /dev/kvm:/dev/kvm
