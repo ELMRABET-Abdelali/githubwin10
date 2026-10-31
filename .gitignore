@@ -8,3 +8,6 @@
 *.vhdx
 windows/
 data/
+
+.secrets/
+.bootstrap.log
