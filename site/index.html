@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#16264a">
+  <meta name="description" content="Tutoriel interactif en français : GitHub Codespaces, Docker, Portainer et Windows 10. Commandes à copier pour les étudiants.">
+  <title>GitHubWin10 — Atelier étudiant</title>
+  <style>
+    :root{--navy:#142347;--blue:#5367df;--ink:#1f2d48;--muted:#64738c;--bg:#f5f7fc;--line:#dfe6f2;--mint:#1ca77d}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink)}
+    a{color:#3855be;text-underline-offset:3px}
+    .wrap{width:min(1040px,calc(100% - 36px));margin:auto}
+    .top,.hero{background:var(--navy);color:white}
+    .top{border-bottom:1px solid #ffffff25}
+    .top-inner{min-height:69px;display:flex;justify-content:space-between;align-items:center;gap:18px}
+    .brand{display:flex;align-items:center;gap:10px;color:white;text-decoration:none;font-weight:850;font-size:1.1rem;letter-spacing:-.02em}
+    .logo{display:grid;place-items:center;width:35px;height:35px;border-radius:10px;background:#6879e9}
+    .navlinks{display:flex;align-items:center;gap:23px}
+    .navlinks a{color:#dde6ff;text-decoration:none;font-size:.9rem;font-weight:650}
+    .navlinks a:hover{color:white}
+    .hero{padding:68px 0 82px;background-image:radial-gradient(circle at 85% 12%,#465fa6 0,transparent 36%)}
+    .hero-grid{display:grid;grid-template-columns:1.35fr .85fr;align-items:center;gap:55px}
+    .eyebrow{display:inline-block;border:1px solid #6c83bb82;color:#bfd1ff;border-radius:30px;padding:6px 12px;font-size:.75rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+    h1{font-size:clamp(2.25rem,4.8vw,4.15rem);line-height:1.09;letter-spacing:-.052em;margin:22px 0 19px}
+    .hero p{color:#c6d4f4;font-size:1.08rem;max-width:650px;line-height:1.72}
+    .actions{display:flex;gap:11px;flex-wrap:wrap;margin-top:27px}
+    .btn{border:1px solid transparent;background:var(--blue);color:white;text-decoration:none;border-radius:11px;padding:11px 17px;font:750 .93rem system-ui;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+    .btn:hover{background:#4056d0}
+    .btn.ghost{background:#ffffff16;border-color:#ffffff46}
+    .btn.ghost:hover{background:#ffffff26}
+    .terminal{background:#0b1832;border:1px solid #8297c355;border-radius:17px;box-shadow:0 18px 45px #0004;overflow:hidden;transform:rotate(1deg)}
+    .terminalbar{display:flex;gap:6px;align-items:center;border-bottom:1px solid #ffffff20;padding:12px}
+    .terminalbar i{display:block;width:10px;height:10px;border-radius:50%;background:#ed7588}
+    .terminalbar i:nth-child(2){background:#e8bd5a}
+    .terminalbar i:nth-child(3){background:#5ed0a4}
+    .terminalbar small{margin-left:auto;color:#91a5cf;font-size:.69rem}
+    .terminal pre{font:13px/1.95 ui-monospace,SFMono-Regular,Consolas,monospace;color:#a3e9c2;margin:0;padding:22px;overflow:hidden}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:-34px;position:relative;z-index:1}
+    .stat{background:white;border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 30px #24365b12;padding:20px 23px}
+    .stat b{display:block;font-size:1.55rem;letter-spacing:-.04em;line-height:1.1}
+    .stat small{color:var(--muted);font-size:.84rem}
+    section{padding-top:75px}
+    .sectionbar{display:flex;justify-content:space-between;align-items:end;gap:25px;margin-bottom:25px}
+    .eyeline{font-size:.75rem;color:#5269d3;text-transform:uppercase;letter-spacing:.13em;font-weight:850}
+    h2{font-size:clamp(1.7rem,3vw,2.3rem);letter-spacing:-.035em;line-height:1.18;margin:5px 0 10px}
+    .lead{margin:0;color:var(--muted)}
+    .progressbox{min-width:200px}
+    .progresshead{display:flex;justify-content:space-between;gap:15px;font-size:.82rem;font-weight:800;margin-bottom:8px}
+    .track{height:8px;background:#dfe7f5;border-radius:20px;overflow:hidden}
+    .fill{height:100%;background:linear-gradient(90deg,#4b6ade,#1bc48e);width:0;transition:width .2s}
+    .steps{display:grid;gap:15px}
+    .step{display:grid;grid-template-columns:64px 1fr;border:1px solid var(--line);border-radius:17px;background:white;overflow:hidden}
+    .step.done{border-color:#a5dac7}
+    .rail{border-right:1px solid #edf0f7;background:#fcfdff;padding-top:26px;display:flex;justify-content:center}
+    .number{width:36px;height:36px;border-radius:10px;background:#eaf0ff;color:#4b61d0;font-weight:850;display:grid;place-items:center}
+    .step.done .number{background:#ddf5eb;color:#07845f}
+    .stepcontent{padding:23px 27px 25px}
+    .stephead{display:flex;justify-content:space-between;gap:12px;align-items:center}
+    h3{font-size:1.15rem;margin:0 0 8px;letter-spacing:-.02em}
+    .stepcontent p,.panel p{margin:0 0 15px;color:var(--muted);font-size:.92rem}
+    .check{display:flex;align-items:center;gap:6px;white-space:nowrap;cursor:pointer;font-weight:750;color:#697990;font-size:.8rem}
+    .check input{accent-color:#16a276;width:17px;height:17px;cursor:pointer}
+    .cmd{display:flex;background:#10203d;border-radius:11px;overflow:hidden}
+    .cmd pre{flex:1;margin:0;padding:16px 17px;color:#deedff;font:13px/1.8 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre;overflow:auto}
+    .cmd button{align-self:flex-start;margin:10px;padding:7px 12px;border-radius:8px;border:1px solid #456186;background:#263c62;color:#ecf3ff;font-weight:750;font-size:.8rem;cursor:pointer}
+    .cmd button:hover{background:#35527e}
+    .cmd button.copied{color:#8df0c8;border-color:#31a381}
+    .hint{background:#eef3ff;color:#475c8d;padding:12px 15px;border-radius:10px;margin-top:13px;font-size:.88rem}
+    .hint.warning{background:#fff3e6;color:#8e551d}
+    .hint.ok{background:#e7f8ef;color:#14694f}
+    .switch{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .switch button{border:1px solid #d8e0ee;border-radius:9px;background:#f7f9fd;padding:8px 12px;font-weight:750;font-size:.83rem;color:#5f6d83;cursor:pointer}
+    .switch button.active{background:#e9efff;border-color:#9baff4;color:#3552c2}
+    .ports{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .port{padding:15px;background:#f8faff;border:1px solid #dfe8f7;border-radius:11px}
+    .port strong{display:block;font-size:1rem}
+    .port small{color:var(--muted)}
+    .port .tag{display:inline-block;font:800 .75rem ui-monospace,monospace;color:#3858c2;background:#e5edff;padding:3px 7px;border-radius:6px;margin-bottom:7px}
+    .columns{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .panel{background:white;border:1px solid var(--line);border-radius:17px;padding:23px}
+    .mini{display:flex;align-items:center;gap:8px;background:#f3f6fc;border-radius:9px;padding:9px;margin-top:8px}
+    .mini code{flex:1;font:12px/1.4 ui-monospace,Consolas,monospace;overflow-wrap:anywhere}
+    .mini button{background:#fff;border:1px solid #ced7e9;color:#3657bb;padding:5px 8px;border-radius:7px;font-size:.76rem;font-weight:750;cursor:pointer}
+    details{background:#fcfdff;border:1px solid #e1e8f1;border-radius:9px;padding:12px;margin:8px 0}
+    summary{font-weight:750;font-size:.9rem;cursor:pointer}
+    details p{margin:9px 0 0!important;font-size:.88rem!important}
+    .share{margin:63px 0 72px;background:#e6edff;border-radius:17px;padding:26px;display:flex;justify-content:space-between;align-items:center;gap:20px}
+    .share h2{font-size:1.35rem;margin:0 0 7px}
+    .share p{color:#63718a;margin:0}
+    footer{border-top:1px solid var(--line);padding:23px 0 34px;color:#77849a;font-size:.82rem}
+    .foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:15px}
+    .toast{position:fixed;z-index:10;bottom:24px;left:50%;transform:translate(-50%,25px);opacity:0;background:#192c4e;color:white;border-radius:10px;padding:10px 17px;pointer-events:none;box-shadow:0 15px 35px #0003;transition:.2s}
+    .toast.show{transform:translate(-50%,0);opacity:1}
+    @media(max-width:840px){.hero-grid{grid-template-columns:1fr}.terminal{display:none}.navlinks a:not(.github){display:none}.columns{grid-template-columns:1fr}}
+    @media(max-width:610px){.wrap{width:calc(100% - 24px)}.hero{padding:47px 0 65px}.stats{gap:7px}.stat{padding:14px 10px}.stat b{font-size:1.24rem}.stat small{font-size:.71rem}section{padding-top:55px}.sectionbar{align-items:stretch;flex-direction:column}.progressbox{min-width:0}.step{grid-template-columns:46px 1fr}.rail{padding-top:20px}.number{height:28px;width:28px;border-radius:8px}.stepcontent{padding:18px 12px 20px}.stephead{align-items:flex-start}.check{font-size:0}.cmd{flex-direction:column}.cmd pre{width:100%;font-size:12px;padding:14px}.cmd button{align-self:flex-end;margin:0 9px 9px}.ports{grid-template-columns:1fr}.share{flex-direction:column;align-items:stretch}.share button{width:100%}.brand{font-size:.95rem}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+  </style>
+</head>
+<body>
+  <header class="top"><div class="wrap top-inner"><a class="brand" href="#haut"><span class="logo">W</span> GitHubWin10 <span style="font-weight:450;opacity:.6">/ Guide</span></a><nav class="navlinks"><a href="#etapes">Étapes</a><a href="#aide">Dépannage</a><a class="github" href="https://github.com/ELMRABET-Abdelali/githubwin10" target="_blank" rel="noopener">Dépôt GitHub ↗</a></nav></div></header>
+  <main id="haut">
+    <div class="hero"><div class="wrap hero-grid">
+      <div><span class="eyebrow">Atelier pratique · Informatique</span><h1>Votre bureau Windows 10, depuis le navigateur.</h1><p>Un tutoriel simple pour les étudiants : créez un GitHub Codespace, démarrez Docker et Portainer, puis testez Windows 10. Chaque commande dispose d'un bouton pour la copier.</p><div class="actions"><a class="btn" href="#etapes">Commencer le tutoriel ↓</a><a class="btn ghost" href="https://github.com/ELMRABET-Abdelali/githubwin10" target="_blank" rel="noopener">Ouvrir GitHub ↗</a></div></div>
+      <div class="terminal" aria-hidden="true"><div class="terminalbar"><i></i><i></i><i></i><small>CODESPACES / TERMINAL</small></div><pre>$ docker compose ps
+NAME                    STATUS
+githubwin10-portainer   Up
+githubwin10-windows     Up
+
+$ # Ports privés
+9000 → Portainer
+8006 → Bureau Windows</pre></div>
+    </div></div>
+    <div class="wrap stats"><div class="stat"><b>4 vCPU</b><small>Prévus pour Windows</small></div><div class="stat"><b>4 Go</b><small>Mémoire Windows</small></div><div class="stat"><b>32 Go</b><small>Disque virtuel QCOW2</small></div></div>
+
+    <section class="wrap" id="etapes">
+      <div class="sectionbar"><div><div class="eyeline">Votre parcours</div><h2>Installation en 6 étapes</h2><p class="lead">Cochez les étapes terminées pour suivre votre progression.</p></div><div class="progressbox"><div class="progresshead"><span>Progression</span><span id="count">0 / 6</span></div><div class="track"><div class="fill" id="fill"></div></div></div></div>
+      <div class="steps">
+        <article class="step"><div class="rail"><span class="number">01</span></div><div class="stepcontent"><div class="stephead"><h3>Créer votre machine Codespaces</h3><label class="check"><input type="checkbox" data-step="1"> Terminé</label></div><p>Connectez-vous à GitHub, ouvrez notre dépôt et choisissez <b>Code → Codespaces → Create codespace on main</b>. Attendez l'ouverture de VS Code dans le navigateur.</p><a href="https://github.com/ELMRABET-Abdelali/githubwin10" target="_blank" rel="noopener"><b>Ouvrir le dépôt GitHubWin10 ↗</b></a><div class="hint">Chaque étudiant utilise son propre compte et crée son propre Codespace.</div></div></article>
+        <article class="step"><div class="rail"><span class="number">02</span></div><div class="stepcontent"><div class="stephead"><h3>Ouvrir le terminal et contrôler la machine</h3><label class="check"><input type="checkbox" data-step="2"> Terminé</label></div><p>Dans Codespaces : <b>Terminal → New Terminal</b>. Vérifiez Docker, KVM, les CPU et l'espace de stockage.</p><div class="cmd"><pre id="c2">cd /workspaces/githubwin10
+docker version
+docker compose version
+bash scripts/check-host.sh</pre><button data-copy="c2">Copier</button></div><div class="hint warning">Avec 32 Go de stockage GitHub au total, Windows peut manquer d'espace pendant l'installation. Le disque virtuel de 32 Go ne représente pas l'espace réellement libre.</div></div></article>
+        <article class="step"><div class="rail"><span class="number">03</span></div><div class="stepcontent"><div class="stephead"><h3>Créer un mot de passe Windows</h3><label class="check"><input type="checkbox" data-step="3"> Terminé</label></div><p>Créez votre fichier privé, puis remplacez la valeur de <b>WINDOWS_PASSWORD</b> par votre mot de passe personnel. Dans nano : <b>Ctrl + O</b>, Entrée, <b>Ctrl + X</b>.</p><div class="cmd"><pre id="c3">cp .env.example .env
+nano .env</pre><button data-copy="c3">Copier</button></div><div class="hint ok">Ne partagez jamais votre mot de passe. Le fichier .env est ignoré par Git.</div></div></article>
+        <article class="step"><div class="rail"><span class="number">04</span></div><div class="stepcontent"><div class="stephead"><h3>Démarrer Portainer</h3><label class="check"><input type="checkbox" data-step="4"> Terminé</label></div><p>Portainer est une interface graphique pour visualiser et gérer vos conteneurs Docker.</p><div class="cmd"><pre id="c4">docker compose up -d portainer</pre><button data-copy="c4">Copier</button></div><div class="hint">Dans l'onglet <b>Ports</b>, ouvrez le port <b>9000</b> et créez votre compte administrateur Portainer.</div></div></article>
+        <article class="step"><div class="rail"><span class="number">05</span></div><div class="stepcontent"><div class="stephead"><h3>Démarrer Windows 10</h3><label class="check"><input type="checkbox" data-step="5"> Terminé</label></div><p>Le script détecte KVM. Sans KVM, il s'arrête pour éviter une installation extrêmement lente sans votre autorisation.</p><div class="switch"><button id="fast" class="active" aria-pressed="true">Avec KVM (recommandé)</button><button id="slow" aria-pressed="false">Sans KVM (très lent)</button></div><div class="cmd"><pre id="c5">bash scripts/start-windows.sh</pre><button data-copy="c5">Copier</button></div><div class="hint warning" id="mode-note">Si « KVM indisponible » apparaît, demandez conseil avant de tenter une émulation logicielle.</div></div></article>
+        <article class="step"><div class="rail"><span class="number">06</span></div><div class="stepcontent"><div class="stephead"><h3>Ouvrir les interfaces</h3><label class="check"><input type="checkbox" data-step="6"> Terminé</label></div><p>Dans Codespaces, ouvrez l'onglet <b>Ports</b> et cliquez sur les liens. Vérifiez que la visibilité reste <b>Private</b>.</p><div class="ports"><div class="port"><span class="tag">PORT 9000</span><strong>Portainer</strong><small>Gestion des conteneurs</small></div><div class="port"><span class="tag">PORT 8006</span><strong>Bureau Windows</strong><small>Installation et bureau web</small></div></div><div class="hint ok">Le premier démarrage peut être long. Ne fermez pas le Codespace pendant l'installation.</div></div></article>
+      </div>
+    </section>
+
+    <section class="wrap" id="aide"><div class="sectionbar"><div><div class="eyeline">Aide et révision</div><h2>Commandes utiles</h2><p class="lead">Arrêter les conteneurs et résoudre les erreurs courantes.</p></div></div><div class="columns">
+      <div class="panel"><h3>Gérer votre machine</h3><p>Windows et Portainer peuvent être arrêtés séparément sans supprimer le disque.</p>
+        <div class="mini"><code id="stop">docker compose stop windows</code><button data-copy="stop">Copier</button></div>
+        <div class="mini"><code id="start">docker compose start windows</code><button data-copy="start">Copier</button></div>
+        <div class="mini"><code id="logs">docker compose --profile windows logs --tail=100 windows</code><button data-copy="logs">Copier</button></div>
+        <div class="mini"><code id="disk">df -h &amp;&amp; docker system df -v</code><button data-copy="disk">Copier</button></div>
+      </div>
+      <div class="panel"><h3>Questions fréquentes</h3>
+        <details><summary>Docker ne répond pas</summary><p>Ouvrez la palette Ctrl + Shift + P et recherchez « Codespaces: Rebuild Container ». Si le daemon reste inaccessible, demandez de l'aide.</p></details>
+        <details><summary>KVM n'est pas disponible</summary><p>Le fonctionnement sans KVM est possible, mais l'émulation QEMU est très lente et consomme vos heures de calcul.</p></details>
+        <details><summary>Il n'y a plus de place sur le disque</summary><p>Le Codespace de 32 Go comprend Linux, Docker, l'ISO Windows et les données. Vérifiez df -h et docker system df -v. Ne supprimez aucun volume sans sauvegarde.</p></details>
+        <details><summary>Je ne vois pas les ports 8006 ou 9000</summary><p>Vérifiez docker ps, puis ajoutez le port dans l'onglet Ports avec « Forward a Port ». Gardez les ports privés.</p></details>
+        <details><summary>Puis-je partager mon Codespace ?</summary><p>Chaque étudiant doit créer le sien depuis le dépôt. Les quotas GitHub et la licence Windows s'appliquent individuellement.</p></details>
+      </div>
+    </div></section>
+    <div class="wrap"><div class="share"><div><h2>Partager ce tutoriel</h2><p>Envoyez le lien à vos étudiants. Ils retrouveront ici les étapes, les commandes à copier et les conseils de sécurité.</p></div><button class="btn" id="share">Copier le lien du guide ↗</button></div></div>
+  </main>
+  <footer><div class="wrap foot"><span>GitHubWin10 · Atelier pédagogique</span><span>Windows 10 nécessite une licence ; son support standard est terminé. N'exposez pas les ports publiquement.</span></div></footer>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    (function(){
+      "use strict";
+      var toast=document.getElementById("toast"),timer;
+      function inform(s){toast.textContent=s;toast.classList.add("show");clearTimeout(timer);timer=setTimeout(function(){toast.classList.remove("show");},2000);}
+      function fallback(s){var t=document.createElement("textarea");t.value=s;t.style.position="fixed";t.style.left="-9999px";document.body.appendChild(t);t.select();var ok=document.execCommand("copy");t.remove();return ok;}
+      async function copy(s,b){try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(s);}else if(!fallback(s)){throw Error("clipboard");}inform("Copié dans le presse-papiers !");if(b){var old=b.textContent;b.textContent="✓ Copié";b.classList.add("copied");setTimeout(function(){b.textContent=old;b.classList.remove("copied");},1600);}}catch(e){inform("Copie impossible : sélectionnez le texte manuellement.");}}
+      document.querySelectorAll("[data-copy]").forEach(function(b){b.addEventListener("click",function(){var e=document.getElementById(b.dataset.copy);if(e){copy(e.textContent.trim(),b);}});});
+      document.getElementById("share").addEventListener("click",function(){copy(location.href.split("#")[0],this);});
+      var fast=document.getElementById("fast"),slow=document.getElementById("slow"),cmd=document.getElementById("c5"),note=document.getElementById("mode-note");
+      function mode(isSlow){fast.classList.toggle("active",!isSlow);slow.classList.toggle("active",isSlow);fast.setAttribute("aria-pressed",String(!isSlow));slow.setAttribute("aria-pressed",String(isSlow));cmd.textContent=isSlow?"ALLOW_SOFTWARE_EMULATION=1 bash scripts/start-windows.sh":"bash scripts/start-windows.sh";note.textContent=isSlow?"Attention : émulation très lente, pouvant épuiser rapidement votre quota de calcul GitHub.":"Si « KVM indisponible » apparaît, demandez conseil avant de tenter une émulation logicielle.";}
+      fast.addEventListener("click",function(){mode(false);});slow.addEventListener("click",function(){mode(true);});
+      var checks=document.querySelectorAll("[data-step]");function progress(){var n=0;checks.forEach(function(c){if(c.checked)n++;c.closest(".step").classList.toggle("done",c.checked);});document.getElementById("count").textContent=n+" / 6";document.getElementById("fill").style.width=(n/checks.length*100)+"%";}
+      checks.forEach(function(c){var k="githubwin10-guide-"+c.dataset.step;try{c.checked=localStorage.getItem(k)==="1";}catch(e){}c.addEventListener("change",function(){try{localStorage.setItem(k,c.checked?"1":"0");}catch(e){}progress();});});progress();
+    })();
+  </script>
+</body>
+</html>
