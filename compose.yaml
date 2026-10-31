@@ -28,7 +28,7 @@ services:
       NETWORK: "user"
       USER_PORTS: "3389"
       LANGUAGE: "${WINDOWS_LANGUAGE:-French}"
-      USERNAME: "${WINDOWS_USERNAME:-etudiant}"
+      USERNAME: "${WINDOWS_USERNAME:-win10}"
       PASSWORD: "${WINDOWS_PASSWORD:?Mot de passe Windows absent dans .env}"
       AUTOLOGIN: "N"
       PROTECT: "Y"
