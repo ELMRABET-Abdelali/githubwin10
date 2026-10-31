@@ -17,7 +17,7 @@ fi
 if [[ -c /dev/kvm ]]; then
   echo "KVM disponible dans ce terminal : acceleration materielle possible."
 else
-  echo "KVM non visible dans ce terminal ; cela ne prouve pas son absence sur l\u0027hote Docker."
+  echo "KVM non visible dans ce terminal ; cela ne prouve pas son absence sur la machine Docker."
 fi
 
 if [[ -c /dev/net/tun ]]; then
