@@ -1,0 +1,10 @@
+.env
+.env.*
+!.env.example
+*.iso
+*.img
+*.qcow2
+*.vhd
+*.vhdx
+windows/
+data/

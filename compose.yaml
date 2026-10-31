@@ -1,0 +1,46 @@
+name: githubwin10
+
+services:
+  portainer:
+    image: portainer/portainer-ce:lts
+    container_name: githubwin10-portainer
+    restart: unless-stopped
+    # HTTP n'est disponible que sur localhost; dans Codespaces, garder le port prive.
+    command: --http-enabled
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9443:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
+  windows:
+    profiles: ["windows"]
+    image: dockurr/windows:latest
+    container_name: githubwin10-windows
+    restart: unless-stopped
+    stop_grace_period: 2m
+    environment:
+      VERSION: "${WINDOWS_VERSION:-10}"
+      CPU_CORES: "${WINDOWS_CPU_CORES:-4}"
+      RAM_SIZE: "${WINDOWS_RAM_SIZE:-4G}"
+      DISK_SIZE: "${WINDOWS_DISK_SIZE:-32G}"
+      DISK_FMT: "qcow2"
+      KVM: "N"
+      NETWORK: "user"
+      USER_PORTS: "3389"
+      REMOVE: "Y"
+      LANGUAGE: "${WINDOWS_LANGUAGE:-French}"
+      USERNAME: "${WINDOWS_USERNAME:-ratech}"
+      PASSWORD: "${WINDOWS_PASSWORD:?Definir WINDOWS_PASSWORD dans .env}"
+      AUTOLOGIN: "N"
+      PROTECT: "Y"
+    ports:
+      - "127.0.0.1:8006:8006"
+      - "127.0.0.1:3389:3389/tcp"
+    volumes:
+      - windows_storage:/storage
+
+volumes:
+  portainer_data:
+  windows_storage:

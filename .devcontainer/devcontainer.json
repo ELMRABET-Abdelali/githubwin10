@@ -1,0 +1,23 @@
+{
+  "name": "GitHubWin10 Docker",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+  },
+  "forwardPorts": [8006, 9000, 9443],
+  "portsAttributes": {
+    "8006": {
+      "label": "Windows 10 - bureau web",
+      "onAutoForward": "notify"
+    },
+    "9000": {
+      "label": "Portainer - Codespaces",
+      "onAutoForward": "notify"
+    },
+    "9443": {
+      "label": "Portainer - HTTPS",
+      "onAutoForward": "notify"
+    }
+  },
+  "postCreateCommand": "bash scripts/check-host.sh"
+}
