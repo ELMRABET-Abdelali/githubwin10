@@ -2,6 +2,14 @@
 
 Site pédagogique : https://githubwin10-etudiants.vercel.app/
 
+## Identifiants Windows par defaut
+
+Pour une **nouvelle installation**, utilisateur Windows : `win10` ; mot de passe Windows : `win10`. Le compte Portainer reste separe (`admin` + mot de passe genere localement, a consulter avec `bash scripts/show-credentials.sh`).
+
+**Securite :** ces identifiants Windows sont publics et uniquement adaptes a un test prive. Garder les ports Codespaces en mode **Private** et definir un mot de passe Windows plus fort avant toute utilisation sensible.
+
+Un Codespace existant avec un fichier `.env` deja cree ou une installation Windows deja effectuee conserve ses anciens identifiants. Changer `.env.example` ne modifie pas automatiquement un compte Windows existant.
+
 ## Ce qui change
 
 Le fichier `compose.yaml` configure **Windows 10, 4 vCPU, 4 Go de RAM, disque virtuel QCOW2 de 32 Go, KVM=Y**, avec le périphérique `/dev/kvm`.
@@ -29,7 +37,7 @@ Ce test vérifie la disponibilité du périphérique Docker mais **ne garantit p
 
 1. Ouvrir https://github.com/ELMRABET-Abdelali/githubwin10
 2. **Code → Codespaces → Create codespace on main**
-3. Le démarrage automatique crée des mots de passe privés et démarre **Portainer sur 9000**. Windows sur **8006** ne démarre automatiquement **que si KVM est utilisable par Docker**.
+3. Le démarrage automatique génère le mot de passe initial de Portainer et démarre **Portainer sur 9000**. Windows sur **8006** ne démarre automatiquement **que si KVM est utilisable par Docker**.
 4. Dans le terminal :
 
 ```bash
@@ -68,7 +76,7 @@ Le script `scripts/bootstrap.sh` :
 - Démarre Windows sur 8006 **seulement si le test KVM réussit**.
 - Ne supprime aucun disque ni volume Docker.
 
-Identifiant initial Portainer : `admin`. Le compte Windows est celui de la variable `WINDOWS_USERNAME` dans `.env`, par défaut `ratech`. Pour lire les mots de passe locaux :
+Identifiant initial Portainer : `admin`. Le compte Windows est celui de la variable `WINDOWS_USERNAME` dans `.env`, par défaut `win10`. Pour lire les mots de passe locaux :
 
 ```bash
 bash scripts/show-credentials.sh
