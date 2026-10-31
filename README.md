@@ -1,104 +1,45 @@
-# GitHubWin10 — Windows 10 + Docker + Portainer
+# GitHubWin10 — Windows 10 et Portainer automatiques
 
-Projet pour **GitHub Codespaces (32 Go de stockage maximum)** ou un serveur **Ubuntu x86_64**. L'image [dockurr/windows](https://github.com/dockur/windows) installe **Windows 10 Pro** dans une VM QEMU lancee par Docker.
+Guide étudiant : https://githubwin10-etudiants.vercel.app/
 
-Configuration : **4 vCPU, 4 Go RAM, disque virtuel QCOW2 de 32 Go**, interface Windows dans le navigateur (port 8006), RDP prive (port 3389) et Portainer CE (ports 9000 HTTP / 9443 HTTPS).
+Après la création ou la reconstruction d'un GitHub Codespace, **postStartCommand** exécute `scripts/bootstrap.sh` automatiquement. Il génère **sur la machine** un mot de passe Windows et un mot de passe initial pour Portainer, puis lance les deux conteneurs sans intervention.
 
-**Important : 32 Go de disque virtuel Windows ne signifient PAS que Windows tiendra dans un Codespace de 32 Go au total.** Linux, Docker et l'ISO Windows (~5,7 Go) utilisent aussi ce disque. L'installation est un essai a espace tres limite ; aucune reussite ne peut etre garantie.
+## Procédure
 
-## 1. Ouvrir GitHub Codespaces
+1. Ouvrir le dépôt : https://github.com/ELMRABET-Abdelali/githubwin10
+2. **Code → Codespaces → Create codespace on main** (ou **Rebuild Container** si le Codespace existe).
+3. Dans le terminal, exécuter : `bash scripts/show-credentials.sh` pour lire les identifiants privés.
+4. Dans **Ports**, ouvrir **9000** pour Portainer et **8006** pour Windows. Garder **Private**.
+5. Si l'initialisation automatique ne s'est pas achevée : `bash scripts/bootstrap.sh`.
 
-Dans ce depot, choisir **Code → Codespaces → Create codespace on main**. GitHub applique `.devcontainer/devcontainer.json` afin de rendre Docker CLI et Compose disponibles. Aucun telechargement de Windows n'est lance automatiquement.
+> Le mot de passe Portainer est utilisé lors de la **création initiale** du compte admin uniquement. Si le volume Portainer contient déjà un compte, le mot de passe précédent reste valide. Le rebuild ne supprime ni ne réinitialise les volumes. Les mots de passe ne doivent **jamais** être partagés ou ajoutés à GitHub.
 
-Dans le terminal :
-
-```bash
-cd /workspaces/githubwin10
-docker version
-docker compose version
-bash scripts/check-host.sh
-```
-
-Si Docker ne repond pas, essayer de reconstruire le conteneur Codespaces (palette de commandes : **Codespaces: Rebuild Container**). Le fichier `.devcontainer/devcontainer.json` utilise le socket Docker de l'hote. Si aucun daemon n'est disponible, cette configuration ne peut pas le creer.
-
-Si `/dev/kvm` est absent, Windows peut demarrer en emulation logicielle via `KVM=N`, mais sera **tres lent**. Le script ne lancera pas Windows en emulation lente sans accord explicite.
-
-## 2. Configurer le compte Windows
+### Diagnostic
 
 ```bash
-cp .env.example .env
-nano .env
-```
-
-Remplacer `WINDOWS_PASSWORD` par un **mot de passe fort et unique**, puis sauvegarder. Le fichier `.env` est ignore par Git : ne jamais le publier dans ce depot public.
-
-## 3. Demarrer
-
-Pour ne lancer que l'interface Docker/Portainer :
-
-```bash
-docker compose up -d portainer
-```
-
-Pour demarrer Portainer et Windows **avec KVM** (uniquement si `/dev/kvm` est un vrai peripherique accessible sur l'hote) :
-
-```bash
-bash scripts/start-windows.sh
-```
-
-Sans KVM, pour un **test experimental tres lent** uniquement :
-
-```bash
-ALLOW_SOFTWARE_EMULATION=1 bash scripts/start-windows.sh
-```
-
-Les scripts ne suppriment aucun ancien conteneur ni volume Docker. En particulier, un ancien Windows 11 provenant du depot `ratech` peut occuper le stockage du meme Codespace : verifier avant de lancer le nouveau Windows.
-
-## 4. Interfaces graphiques
-
-Dans VS Code / Codespaces, ouvrir l'onglet **Ports**. Les ports doivent rester **Private**.
-
-| Service | Port local | Interface |
-| --- | --- | --- |
-| Windows 10 (web) | 8006 | `http://localhost:8006` / lien prive du port |
-| Portainer (Codespaces) | 9000 | `http://localhost:9000` / lien prive du port |
-| Portainer HTTPS (serveur Ubuntu) | 9443 | `https://localhost:9443` |
-| Windows RDP | 3389 TCP | `localhost:3389`, via tunnel SSH ou routage prive |
-
-Le port 9000 est HTTP **sur localhost seulement** ; ne le rendre jamais public. Pour une VM Ubuntu distante, utiliser de preference 9443 avec tunnel SSH. La protection du bureau web Windows est activee.
-
-## 5. Diagnostic, arret et reprise
-
-```bash
-df -h
-docker system df -v
 docker compose ps -a
-docker compose logs -f windows
-docker compose stop windows
-docker compose start windows
+docker logs --tail=100 githubwin10-windows
+docker logs --tail=100 githubwin10-portainer
+curl -I http://127.0.0.1:8006
+df -h
+docker system df
 ```
 
-Ne pas utiliser `docker compose down -v` ni `docker volume prune` : ces commandes peuvent effacer le disque Windows et les donnees Portainer. Le volume du nouveau Windows se nomme `githubwin10_windows_storage`.
+### Limites à connaître
 
-**Codespaces n'est pas une VM Windows permanente** : il consomme des heures-coeur pendant qu'il est actif, et du stockage meme arrete. Les droits KVM, les limites de quota et le stockage disponible dependent de GitHub. Une licence Windows appropriee reste necessaire ; Windows 10 Pro a atteint sa fin de support general en octobre 2025.
+- Windows utilise l'image `dockurr/windows:latest`, version 10, 4 vCPU, RAM 4 Go, disque virtuel QCOW2 de 32 Go.
+- Un Codespace de **32 Go au total** peut manquer de place pour l'ISO, Docker et l'installation Windows, même si QCOW2 alloue le disque progressivement.
+- Sans `/dev/kvm`, démarrage automatique en émulation QEMU **très lente** : l'interface 8006 peut apparaître alors que Windows ne peut pas démarrer correctement. Aucun code ne peut rendre KVM disponible si GitHub ne le fournit pas.
+- Les ports exposés par Docker doivent rester **Private dans Codespaces**, et jamais être publiés à des utilisateurs non autorisés.
+- Windows 10 est hors support standard, une licence Windows reste nécessaire.
 
-## 6. Hote Ubuntu (hors Codespaces)
-
-Sur un vrai hote Ubuntu avec `sudo` :
+### Initialisation ou dépannage manuel
 
 ```bash
-git clone https://github.com/ELMRABET-Abdelali/githubwin10.git
-cd githubwin10
-sudo bash scripts/install-docker-ubuntu.sh
-cp .env.example .env
-nano .env
-sudo bash scripts/check-host.sh
-sudo bash scripts/start-windows.sh
+bash scripts/bootstrap.sh
+bash scripts/show-credentials.sh
+docker compose restart portainer
+docker compose restart windows
 ```
 
-## References
-
-- [dockurr/windows](https://github.com/dockur/windows)
-- [Portainer CE](https://docs.portainer.io/start/install-ce/server/docker/linux)
-- [Docker Engine Ubuntu](https://docs.docker.com/engine/install/ubuntu/)
-- [GitHub Codespaces — machines et stockage](https://docs.github.com/en/codespaces/customizing-your-codespace/changing-the-machine-type-for-your-codespace)
+Pour un compte Portainer déjà créé, utiliser l'outil officiel de réinitialisation de Portainer après avoir stoppé le conteneur et sauvegardé son volume, pas la commande d'initialisation.
