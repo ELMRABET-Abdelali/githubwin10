@@ -43,3 +43,27 @@ docker compose restart windows
 ```
 
 Pour un compte Portainer déjà créé, utiliser l'outil officiel de réinitialisation de Portainer après avoir stoppé le conteneur et sauvegardé son volume, pas la commande d'initialisation.
+
+## Depuis un Codespace existant
+
+Cloner :
+
+```bash
+cd /workspaces
+git clone https://github.com/ELMRABET-Abdelali/githubwin10.git
+cd githubwin10
+```
+
+Installer et demarrer automatiquement :
+
+```bash
+bash scripts/bootstrap.sh
+```
+
+Afficher les identifiants :
+
+```bash
+bash scripts/show-credentials.sh
+```
+
+Si vous avez cree le Codespace directement depuis ce depot, le clonage est inutile et le bootstrap s'execute au demarrage. Les ports Windows et Portainer sont 8006 et 9000, a conserver en mode prive. La commande bootstrap suppose Docker Engine et Docker Compose deja accessibles ; sinon utilisez un Codespace construit depuis ce depot.
