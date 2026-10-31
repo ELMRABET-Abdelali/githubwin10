@@ -17,7 +17,7 @@ fi
 if [[ -c /dev/kvm ]]; then
   echo "KVM disponible dans ce terminal : acceleration materielle possible."
 else
-  echo "KVM indisponible ici : emulation logicielle seulement, tres lente."
+  echo "KVM non visible dans ce terminal ; cela ne prouve pas son absence sur l\u0027hote Docker."
 fi
 
 if [[ -c /dev/net/tun ]]; then
@@ -29,4 +29,4 @@ fi
 echo "CPU logiques : $(nproc)"
 free -h || true
 df -h . || true
-echo "ATTENTION : 32 Go de stockage total pour Linux + Docker + ISO + Windows 10 peut etre insuffisant."
+echo "KVM obligatoire pour Windows : bash scripts/check-kvm.sh teste le moteur Docker."\necho "ATTENTION : 32 Go de stockage total pour Linux + Docker + ISO + Windows 10 peuvent etre insuffisants."
