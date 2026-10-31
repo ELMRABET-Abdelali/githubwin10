@@ -1,23 +1,31 @@
 {
-  "name": "GitHubWin10 Docker",
+  "name": "GitHubWin10 – démarrage automatique",
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
   "features": {
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
   },
-  "forwardPorts": [8006, 9000, 9443],
+  "forwardPorts": [
+    8006,
+    9000,
+    9443
+  ],
   "portsAttributes": {
     "8006": {
-      "label": "Windows 10 - bureau web",
-      "onAutoForward": "notify"
+      "label": "Windows 10 – bureau web",
+      "onAutoForward": "notify",
+      "visibility": "private"
     },
     "9000": {
-      "label": "Portainer - Codespaces",
-      "onAutoForward": "notify"
+      "label": "Portainer HTTP – privé",
+      "onAutoForward": "notify",
+      "visibility": "private"
     },
     "9443": {
-      "label": "Portainer - HTTPS",
-      "onAutoForward": "notify"
+      "label": "Portainer HTTPS – privé",
+      "onAutoForward": "notify",
+      "visibility": "private"
     }
   },
-  "postCreateCommand": "bash scripts/check-host.sh"
+  "postCreateCommand": "bash scripts/check-host.sh",
+  "postStartCommand": "bash scripts/bootstrap.sh"
 }
